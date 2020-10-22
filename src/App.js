@@ -1,66 +1,49 @@
-import React from 'react';
+import React  from 'react';
+import { useState,useEffect } from 'react';
+import {View} from './View'
 
+function MyComponent() {
+  const [error, setError] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [items, setItems] = useState([]);
 
-// eslint-disable-next-line no-undef
-class App extends Component {
-
-    constructor(props) {
-
-        super(props);
-
-        this.state = {
-            items: [],
-            isLoaded: false
+  useEffect(() => {
+    fetch("https://www.nbrb.by/api/exrates/rates?periodicity=0")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          setIsLoaded(true);
+          setItems(result);
+        },
+     
+        (error) => {
+          setIsLoaded(true);
+          setError(error);
         }
+      )
+  }, [])
 
-    }
-
-    /**
-     * componentDidMount
-     *
-     * Fetch json array of objects from given url and update state.
-     */
-    componentDidMount() {
-
-        fetch('https://jsonplaceholder.typicode.com/users')
-            .then(res => res.json())
-            .then(json => {
-                this.setState({
-                    items: json,
-                    isLoaded: true, 
-                })
-            }).catch((err) => {
-                console.log(err);
-            });
-
-    }
-
-    /**
-     * render
-     *
-     * Render UI
-     */
-    render() {
-
-        var { isLoaded, items } = this.state;
-
-        if (!isLoaded)
-            return <div>Loading...</div>;
-
-        return (
-            <div className="App">
-                <ul>
-                    {items.map(item => (
-                        <li key={item.id}>
-                            Name: {item.name} | Email: {item.email}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
-
-    }
-
+  if (error) {
+    return <div>Ошибка: {error.message}</div>;
+  } else if (!isLoaded) {
+    return <div>Загрузка...</div>;
+  } else {
+    return (
+      <ul>
+        {items.map(item => (
+            <View item ={item} />
+        ))}
+        {/* {items.map(item => (
+          <tr >
+            {item.Cur_Name}
+            <td>
+             {item.Cur_OfficialRate}
+             </td>
+          </tr>
+        ))} */}
+      </ul>
+    );
+  }
 }
 
-export default App;
+export default MyComponent;
